@@ -43,7 +43,7 @@ async function fetchGeojson(url) {
 // =====================
 const map = new maplibregl.Map({
   container: "map",
-  style: "https://demotiles.maplibre.org/style.json",
+  style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
   center: [2.35, 48.86],
   zoom: 6
 });
@@ -255,3 +255,4 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
