@@ -43,12 +43,33 @@ async function fetchGeojson(url) {
 // =====================
 const map = new maplibregl.Map({
   container: "map",
-  style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  style: {
+    version: 8,
+    sources: {
+      osm: {
+        type: "raster",
+        tiles: [
+          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        ],
+        tileSize: 256,
+        attribution:
+          '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+      }
+    },
+    layers: [
+      {
+        id: "osm",
+        type: "raster",
+        source: "osm"
+      }
+    ]
+  },
   center: [2.35, 48.86],
   zoom: 6
 });
 
-map.addControl(new maplibregl.NavigationControl(), "top-right");
 
 // =====================
 // 4) POPUP PAGINÉE
@@ -255,5 +276,6 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
 
 
