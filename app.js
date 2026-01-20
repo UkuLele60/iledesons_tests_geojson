@@ -1,5 +1,26 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+window.onerror = (msg, url, line, col, err) => {
+  alert(`Erreur JS: ${msg}\n${url}:${line}:${col}`);
+};
+
+window.onunhandledrejection = (e) => {
+  alert(`Promise rejetée: ${e.reason?.message || e.reason}`);
+};
+
+const debug = document.createElement("div");
+debug.style.position = "absolute";
+debug.style.zIndex = 9999;
+debug.style.left = "10px";
+debug.style.bottom = "10px";
+debug.style.padding = "8px 10px";
+debug.style.background = "rgba(255,255,255,0.9)";
+debug.style.border = "1px solid #ddd";
+debug.style.borderRadius = "10px";
+debug.style.font = "12px/1.3 system-ui";
+debug.textContent = "Debug: chargement…";
+document.body.appendChild(debug);
+
 // =====================
 // 1) CONFIG
 // =====================
@@ -70,6 +91,11 @@ const map = new maplibregl.Map({
   zoom: 6
 });
 
+// Permet de sélectionner / clic droit sans que la carte “vole” la souris
+map.dragPan.disable();
+
+// (Optionnel) réactiver si tu veux avec Shift + drag seulement
+map.dragPan.enable({ linearity: 0.3 }); // si tu veux, sinon laisse désactivé
 
 // =====================
 // 4) POPUP PAGINÉE
@@ -276,6 +302,7 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
 
 
 
