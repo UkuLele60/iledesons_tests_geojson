@@ -43,7 +43,7 @@ const GEO_ID_PROP = "ID";          // côté GeoJSON: properties.ID
 const PAGE_SIZE = 8;
 
 // Colonnes à afficher dans la popup (ajuste selon ta table)
-const DISPLAY_COLS = ["titre", "artiste"]; // adapte si besoin
+const DISPLAY_COLS = ["full_title"]; // adapte si besoin
 
 // =====================
 // 2) OUTILS
@@ -122,10 +122,8 @@ function makePopupDOM() {
 }
 
 function rowToDisplay(row) {
-  // Affichage simple : titre + artiste (modifiable)
-  const titre = row?.[DISPLAY_COLS[0]] ?? "(sans titre)";
-  const artiste = row?.[DISPLAY_COLS[1]] ?? "";
-  return { titre, artiste };
+  const titre = row?.full_title ?? "(sans titre)";
+  return { titre, artiste: "" };
 }
 
 async function fetchPageForId(id, pageIndex) {
@@ -302,6 +300,7 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
 
 
 
