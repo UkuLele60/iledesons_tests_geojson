@@ -34,6 +34,11 @@ const SOURCES = [
   { key: "fleuves", url: "./data/fleuves_WGS84.geojson" }
 ];
 
+const COLORS = {
+  fleuves: "#2563eb", // bleu
+  dep: "#f97316"      // orange
+};
+
 // Supabase
 const TABLE = "chansons";
 const JOIN_COL = "anciens_id";     // côté Supabase
@@ -253,40 +258,85 @@ function openPaginatedPopup({ lngLat, id, kind }) {
 // =====================
 function addLayerForSource(key, geojson) {
   const sourceId = `${key}-source`;
-  const layerId = `${key}-layer`;
 
   map.addSource(sourceId, {
     type: "geojson",
     data: geojson
   });
 
-  map.addLayer({
-    id: layerId,
-    type: "line",
-    source: sourceId,
-    paint: {
-      "line-width": 4
-      // (Tu peux différencier dep / fleuves ici si tu veux)
-    }
-  });
+  // Détecter le type de géométrie du GeoJSON (simple: on regarde la première feature)
+  const firstType = geojson?.features?.[0]?.geometry?.type;
 
-  // clic => popup paginée (requête Supabase à ce moment-là)
-  map.on("click", layerId, (e) => {
-    const f = e.features?.[0];
-    if (!f) return;
+  const isPolygon =
+    firstType === "Polygon" ||
+    firstType === "MultiPolygon";
 
-    const rawId = f.properties?.[GEO_ID_PROP];
-    const id = normalizeId(rawId);
+  if (isPolygon) {
+    // ✅ DEP : remplissage cliquable + contour
+    const fillLayerId = `${key}-fill`;
+    const outlineLayerId = `${key}-outline`;
 
-    openPaginatedPopup({
-      lngLat: e.lngLat,
-      id,
-      kind: key
+    map.addLayer({
+      id: fillLayerId,
+      type: "fill",
+      source: sourceId,
+      paint: {
+        "fill-color": COLORS[key] || "#f97316",
+        "fill-opacity": 0.6
+      }
     });
-  });
 
-  map.on("mouseenter", layerId, () => map.getCanvas().style.cursor = "pointer");
-  map.on("mouseleave", layerId, () => map.getCanvas().style.cursor = "");
+    map.addLayer({
+      id: outlineLayerId,
+      type: "line",
+      source: sourceId,
+      paint: {
+        "line-color": COLORS[key] || "#f97316",
+        "line-width": 2
+      }
+    });
+
+    // ✅ clic sur l'intérieur (fill)
+    map.on("click", fillLayerId, (e) => {
+      const f = e.features?.[0];
+      if (!f) return;
+
+      const rawId = f.properties?.[GEO_ID_PROP];
+      const id = normalizeId(rawId);
+
+      openPaginatedPopup({ lngLat: e.lngLat, id, kind: key });
+    });
+
+    map.on("mouseenter", fillLayerId, () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", fillLayerId, () => map.getCanvas().style.cursor = "");
+
+  } else {
+    // ✅ FLEUVES : lignes bleues
+    const lineLayerId = `${key}-line`;
+
+    map.addLayer({
+      id: lineLayerId,
+      type: "line",
+      source: sourceId,
+      paint: {
+        "line-width": 4,
+        "line-color": COLORS[key] || "#2563eb"
+      }
+    });
+
+    map.on("click", lineLayerId, (e) => {
+      const f = e.features?.[0];
+      if (!f) return;
+
+      const rawId = f.properties?.[GEO_ID_PROP];
+      const id = normalizeId(rawId);
+
+      openPaginatedPopup({ lngLat: e.lngLat, id, kind: key });
+    });
+
+    map.on("mouseenter", lineLayerId, () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", lineLayerId, () => map.getCanvas().style.cursor = "");
+  }
 }
 
 map.on("load", async () => {
@@ -300,6 +350,7 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
 
 
 
