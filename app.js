@@ -30,8 +30,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Tes 2 fichiers GeoJSON dans le repo
 const SOURCES = [
-  { key: "dep",     url: "./data/dep.geojson" },
-  { key: "fleuves", url: "./data/fleuves.geojson" }
+  { key: "dep",     url: "./data/dep_4326.geojson" },
+  { key: "fleuves", url: "./data/fleuves_4326.geojson" }
 ];
 
 // Supabase
@@ -302,6 +302,7 @@ map.on("load", async () => {
     alert("Erreur: " + (err?.message || err));
   }
 });
+
 
 
 
